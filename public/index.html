@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeeTKOB slice</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; }
+  input, button, textarea { font: inherit; }
+  textarea { width: 100%; height: 12rem; font-family: ui-monospace, monospace; }
+  pre { background: #f4f4f4; padding: .75rem; overflow-x: auto; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<h1>LeeTKOB — lab 1</h1>
+<p><label>Token <input id="token" value="tok-stu1"></label> <button id="signin">Sign in</button> <span id="who"></span></p>
+
+<section id="student" hidden>
+  <h2>Submit</h2>
+  <textarea id="code">#include &lt;vector&gt;
+void merge(std::vector&lt;int&gt;&amp; a, int l, int mid, int r);
+void mergeSort(std::vector&lt;int&gt;&amp; a, int l, int r) {
+  if (r - l &lt; 1) return;
+  int mid = (l + r) / 2;
+  mergeSort(a, l, mid); mergeSort(a, mid + 1, r);
+  merge(a, l, mid, r);
+}</textarea>
+  <button id="submit">Submit</button>
+</section>
+
+<!-- Only TAs see this button. -->
+<section id="ta" hidden>
+  <h2>Grades</h2>
+  <button id="publish">Publish lab 1 grades</button>
+</section>
+
+<pre id="out"></pre>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const api = (method, path, body) => fetch(path, {
+    method,
+    headers: { authorization: 'Bearer ' + $('token').value, 'content-type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  }).then(async (r) => ({ status: r.status, body: await r.json().catch(() => null) }));
+  const show = (x) => { $('out').textContent = JSON.stringify(x, null, 2); };
+
+  $('signin').onclick = async () => {
+    const r = await api('GET', '/api/me');
+    if (r.status !== 200) return show(r);
+    $('who').textContent = `${r.body.name} (${r.body.role})`;
+    $('student').hidden = r.body.role !== 'student';
+    $('ta').hidden = r.body.role !== 'ta';
+  };
+  $('submit').onclick = async () => show(await api('POST', '/api/labs/1/submissions', { code: $('code').value }));
+  $('publish').onclick = async () => show(await api('POST', '/api/labs/1/publish'));
+</script>
+</body>
+</html>

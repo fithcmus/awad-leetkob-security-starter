@@ -1,0 +1,14 @@
+{
+  "name": "leetkob-security-slice",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Session 6 — a small, deliberately vulnerable slice of LeeTKOB to red-team",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test --test-reporter=spec test/app.test.js",
+    "attack": "node --test --test-reporter=spec test/attack.test.js",
+    "scan": "node scripts/scan-secrets.js"
+  }
+}
